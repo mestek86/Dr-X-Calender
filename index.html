@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reservations Calendar</title>
+  <title>Dr X Clinic - Appointments Calendar</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -207,6 +207,17 @@
       border: 2px solid #ff6b6b;
     }
     
+    .debug-info {
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 12px;
+      font-family: monospace;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
     /* Modal styles */
     .modal {
       display: none;
@@ -317,8 +328,8 @@
   <div class="container">
     <div class="header">
       <div class="title">
-        <span>📅</span>
-        <span id="monthTitle">Reservations Calendar</span>
+        <span>🏥</span>
+        <span id="monthTitle">Dr X Clinic - Appointments</span>
       </div>
     </div>
     
@@ -339,19 +350,18 @@
       <button id="btnNext">Next →</button>
       <select id="tzSelect">
         <option value="UTC">🌍 UTC</option>
-        <option value="America/New_York">🇺🇸 New York (EST)</option>
-        <option value="America/Los_Angeles">🇺🇸 Los Angeles (PST)</option>
-        <option value="Europe/London">🇬🇧 London (GMT)</option>
-        <option value="Europe/Paris">🇫🇷 Paris (CET)</option>
-        <option value="Asia/Tokyo">🇯🇵 Tokyo (JST)</option>
-        <option value="Asia/Dubai">🇦🇪 Dubai (GST)</option>
-        <option value="Australia/Sydney">🇦🇺 Sydney (AEDT)</option>
+        <option value="Africa/Cairo">🇪🇬 Cairo</option>
+        <option value="Europe/London">🇬🇧 London</option>
+        <option value="America/New_York">🇺🇸 New York</option>
       </select>
+      <button id="btnDebug">🐛 Debug</button>
     </div>
     
     <div id="calendarContainer">
       <div class="loading">Loading calendar data</div>
     </div>
+    
+    <div id="debugInfo" class="debug-info" style="display: none;"></div>
   </div>
   
   <!-- Modal for event details -->
@@ -364,18 +374,30 @@
   </div>
 
   <script>
-    // ⚙️ CONFIGURATION - UPDATE THIS WITH YOUR N8N WEBHOOK URL
-    const API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook/availability';
+    // ⚙️ CONFIGURATION - REPLACE WITH YOUR ACTUAL N8N WEBHOOK URL
+    const API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook-test/availability';
     
     // State management
-    let currentDate = new Date('2025-10-01');
+    let currentDate = new Date('2025-10-01'); // Start at October 2025
     let timezone = 'UTC';
     let reservations = [];
+    let debugLog = [];
     
     // Constants
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
     const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    
+    // Debug logging
+    function log(message, data = null) {
+      const timestamp = new Date().toISOString();
+      const logEntry = `[${timestamp}] ${message}`;
+      debugLog.push(logEntry);
+      if (data) {
+        debugLog.push(JSON.stringify(data, null, 2));
+      }
+      console.log(logEntry, data);
+    }
     
     // Load reservations from n8n API
     async function loadReservations() {
@@ -386,29 +408,46 @@
       const fromDate = new Date(year, month, 1).toISOString();
       const toDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
       
+      const apiUrl = `${API_URL}?from=${fromDate}&to=${toDate}&tz=${timezone}`;
+      
+      log('Loading reservations...', { apiUrl, year, month: month + 1 });
+      
       // Show loading state
       document.getElementById('calendarContainer').innerHTML = 
         '<div class="loading">Loading calendar data</div>';
       
       try {
-        const response = await fetch(`${API_URL}?from=${fromDate}&to=${toDate}&tz=${timezone}`);
+        log('Fetching from API...');
+        const response = await fetch(apiUrl);
+        
+        log('Response received', { 
+          status: response.status, 
+          statusText: response.statusText,
+          ok: response.ok 
+        });
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
+        log('Data parsed', data);
         
         if (data.success) {
           reservations = data.events || [];
+          log(`Found ${reservations.length} reservations`);
           updateStats();
           renderCalendar();
         } else {
-          showError('Failed to load reservations. Please try again.');
+          showError('API returned success: false. Check n8n workflow.');
+          log('API returned success: false', data);
         }
       } catch (error) {
-        console.error('Error loading reservations:', error);
-        showError(`Error connecting to server: ${error.message}`);
+        log('Error occurred', { 
+          message: error.message, 
+          stack: error.stack 
+        });
+        showError(`Error: ${error.message}<br><br>Check console (F12) for details.`);
       }
     }
     
@@ -417,6 +456,7 @@
       const totalCount = reservations.length;
       document.getElementById('totalEvents').textContent = totalCount;
       document.getElementById('monthEvents').textContent = totalCount;
+      log('Stats updated', { totalCount });
     }
     
     // Render calendar grid
@@ -428,8 +468,10 @@
       const daysInMonth = lastDay.getDate();
       const startingDayOfWeek = firstDay.getDay();
       
+      log('Rendering calendar', { year, month: month + 1, daysInMonth });
+      
       // Update title
-      document.getElementById('monthTitle').textContent = `${monthNames[month]} ${year}`;
+      document.getElementById('monthTitle').textContent = `Dr X Clinic - ${monthNames[month]} ${year}`;
       
       // Build calendar HTML
       let html = '<div class="calendar-grid">';
@@ -457,8 +499,13 @@
         const dayEvents = reservations.filter(res => {
           if (!res.start) return false;
           const resDate = new Date(res.start);
-          return resDate.toISOString().split('T'),[object Object], === dateStr;
+          const resDateStr = resDate.toISOString().split('T'),[object Object],;
+          return resDateStr === dateStr;
         });
+        
+        if (dayEvents.length > 0) {
+          log(`Day ${day} has ${dayEvents.length} events`, dayEvents);
+        }
         
         // Determine day classes
         const isToday = currentDateObj.getTime() === today.getTime();
@@ -474,10 +521,10 @@
         // Add reservation badges
         dayEvents.forEach(evt => {
           const startTime = new Date(evt.start);
-          const hours = String(startTime.getHours()).padStart(2, '0');
-          const minutes = String(startTime.getMinutes()).padStart(2, '0');
+          const hours = String(startTime.getUTCHours()).padStart(2, '0');
+          const minutes = String(startTime.getUTCMinutes()).padStart(2, '0');
           const timeStr = `${hours}:${minutes}`;
-          const title = evt.title || 'Reserved';
+          const title = evt.title || evt.name || 'Appointment';
           
           html += `<div class="reservation" data-event-id="${evt.id}">`;
           html += `<div class="res-time">${timeStr}</div>`;
@@ -490,6 +537,8 @@
       
       html += '</div>';
       document.getElementById('calendarContainer').innerHTML = html;
+      
+      log('Calendar rendered successfully');
       
       // Add click listeners to reservations
       document.querySelectorAll('.reservation').forEach(el => {
@@ -515,11 +564,13 @@
       const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
       const durationStr = `${durationHours}h ${durationMinutes}m`;
       
-      document.getElementById('modalTitle').innerHTML = `📌 ${event.title}`;
+      document.getElementById('modalTitle').innerHTML = `📌 ${event.title || event.name}`;
       document.getElementById('modalBody').innerHTML = `
         <p><strong>📅 Start:</strong> ${startTime.toLocaleString()}</p>
         <p><strong>🏁 End:</strong> ${endTime.toLocaleString()}</p>
         <p><strong>⏱️ Duration:</strong> ${durationStr}</p>
+        ${event.reference ? `<p><strong>🔖 Reference:</strong> ${event.reference}</p>` : ''}
+        ${event.phone ? `<p><strong>📞 Phone:</strong> ${event.phone}</p>` : ''}
         ${event.description ? `<p><strong>📝 Description:</strong><br>${event.description}</p>` : ''}
       `;
       
@@ -532,29 +583,47 @@
         `<div class="error">❌ ${message}</div>`;
     }
     
+    // Show debug info
+    function toggleDebug() {
+      const debugDiv = document.getElementById('debugInfo');
+      if (debugDiv.style.display === 'none') {
+        debugDiv.style.display = 'block';
+        debugDiv.innerHTML = '<strong>Debug Log:</strong><br>' + debugLog.join('<br>');
+      } else {
+        debugDiv.style.display = 'none';
+      }
+    }
+    
     // Navigation: Previous month
     document.getElementById('btnPrev').addEventListener('click', () => {
       currentDate.setMonth(currentDate.getMonth() - 1);
+      log('Navigate to previous month');
       loadReservations();
     });
     
     // Navigation: Next month
     document.getElementById('btnNext').addEventListener('click', () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
+      log('Navigate to next month');
       loadReservations();
     });
     
     // Navigation: Today
     document.getElementById('btnToday').addEventListener('click', () => {
-      currentDate = new Date();
+      currentDate = new Date('2025-10-01');
+      log('Navigate to October 2025');
       loadReservations();
     });
     
     // Timezone change
     document.getElementById('tzSelect').addEventListener('change', (e) => {
       timezone = e.target.value;
+      log('Timezone changed', { timezone });
       loadReservations();
     });
+    
+    // Debug button
+    document.getElementById('btnDebug').addEventListener('click', toggleDebug);
     
     // Modal close button
     document.getElementById('modalClose').addEventListener('click', () => {
@@ -569,6 +638,7 @@
     });
     
     // Initial load
+    log('Application started');
     loadReservations();
   </script>
 </body>
