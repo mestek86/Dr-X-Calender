@@ -498,7 +498,11 @@ select {
         <button id="btnToday">Today</button>
         <button id="btnNext">Next →</button>
         <select id="tzSelect">
+            <option value="Africa/Cairo">🇪🇬 Cairo (Egypt)</option>
             <option value="UTC">🌍 UTC</option>
+            <option value="America/New_York">🇺🇸 New York</option>
+            <option value="Europe/London">🇬🇧 London</option>
+            <option value="Asia/Dubai">🇦🇪 Dubai</option>
         </select>
     </div>
     
@@ -522,9 +526,57 @@ const API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook/availability';
 // State
 let currentDate = new Date(2025, 9, 1);
 let reservations = [];
+let selectedTimezone = 'Africa/Cairo'; // Default to Cairo
+
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'];
 const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+// Convert UTC time to selected timezone
+function convertToTimezone(utcDate, timezone) {
+    try {
+        return new Date(utcDate.toLocaleString('en-US', { timeZone: timezone }));
+    } catch (error) {
+        console.error('Timezone conversion error:', error);
+        return utcDate;
+    }
+}
+
+// Format time for display in selected timezone
+function formatTimeInTimezone(date, timezone) {
+    try {
+        return date.toLocaleString('en-US', { 
+            timeZone: timezone,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    } catch (error) {
+        console.error('Time formatting error:', error);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+}
+
+// Format date for display in selected timezone
+function formatDateInTimezone(date, timezone) {
+    try {
+        const converted = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+        return {
+            year: converted.getFullYear(),
+            month: converted.getMonth(),
+            day: converted.getDate()
+        };
+    } catch (error) {
+        console.error('Date formatting error:', error);
+        return {
+            year: date.getFullYear(),
+            month: date.getMonth(),
+            day: date.getDate()
+        };
+    }
+}
 
 // Load reservations
 async function loadReservations() {
@@ -533,7 +585,7 @@ async function loadReservations() {
         const month = currentDate.getMonth();
         const fromDate = new Date(year, month, 1).toISOString();
         const toDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
-        const url = `${API_URL}?from=${fromDate}&to=${toDate}&tz=UTC`;
+        const url = `${API_URL}?from=${fromDate}&to=${toDate}&tz=${selectedTimezone}`;
         
         console.log('Fetching:', url);
         const response = await fetch(url);
@@ -573,7 +625,11 @@ function renderCalendar() {
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
     
-    document.getElementById('monthTitle').textContent = `${monthNames[month]} ${year}`;
+    // Get timezone name for display
+    const tzName = selectedTimezone === 'Africa/Cairo' ? 'Cairo Time' : 
+                   selectedTimezone === 'UTC' ? 'UTC' : selectedTimezone.split('/'),[object Object],;
+    
+    document.getElementById('monthTitle').textContent = `${monthNames[month]} ${year} (${tzName})`;
     
     let html = '<div class="calendar-grid">';
     
@@ -591,10 +647,11 @@ function renderCalendar() {
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         
-        // Find events for this day
+        // Find events for this day in selected timezone
         const dayEvents = reservations.filter(res => {
             const resDate = new Date(res.start);
-            const resDateStr = `${resDate.getFullYear()}-${String(resDate.getMonth() + 1).padStart(2, '0')}-${String(resDate.getDate()).padStart(2, '0')}`;
+            const converted = formatDateInTimezone(resDate, selectedTimezone);
+            const resDateStr = `${converted.year}-${String(converted.month + 1).padStart(2, '0')}-${String(converted.day).padStart(2, '0')}`;
             return resDateStr === dateStr;
         });
         
@@ -607,9 +664,7 @@ function renderCalendar() {
         // Add events
         dayEvents.forEach(evt => {
             const startTime = new Date(evt.start);
-            const hours = String(startTime.getHours()).padStart(2, '0');
-            const minutes = String(startTime.getMinutes()).padStart(2, '0');
-            const timeStr = `${hours}:${minutes}`;
+            const timeStr = formatTimeInTimezone(startTime, selectedTimezone);
             
             html += `<div class="reservation" onclick="showEvent(${evt.id})">`;
             html += `<div class="res-time">${timeStr}</div>`;
@@ -632,10 +687,27 @@ function showEvent(eventId) {
     const startTime = new Date(event.start);
     const endTime = new Date(event.end);
     
+    // Format dates in selected timezone
+    const startStr = startTime.toLocaleString('en-US', { 
+        timeZone: selectedTimezone,
+        dateStyle: 'full',
+        timeStyle: 'short'
+    });
+    
+    const endStr = endTime.toLocaleString('en-US', { 
+        timeZone: selectedTimezone,
+        dateStyle: 'full',
+        timeStyle: 'short'
+    });
+    
+    const tzName = selectedTimezone === 'Africa/Cairo' ? 'Cairo Time' : 
+                   selectedTimezone === 'UTC' ? 'UTC' : selectedTimezone.split('/'),[object Object],;
+    
     document.getElementById('modalTitle').textContent = event.title || event.name;
     document.getElementById('modalBody').innerHTML = `
-        <p><strong>📅 Start:</strong> ${startTime.toLocaleString()}</p>
-        <p><strong>🏁 End:</strong> ${endTime.toLocaleString()}</p>
+        <p><strong>📅 Start:</strong> ${startStr}</p>
+        <p><strong>🏁 End:</strong> ${endStr}</p>
+        <p><strong>🌍 Timezone:</strong> ${tzName}</p>
         ${event.reference ? `<p><strong>🔖 Reference:</strong> ${event.reference}</p>` : ''}
         ${event.phone ? `<p><strong>📞 Phone:</strong> ${event.phone}</p>` : ''}
         ${event.payment ? `<p><strong>💳 Payment:</strong> ${event.payment}</p>` : ''}
@@ -653,6 +725,13 @@ window.showEvent = showEvent;
 function showError(message) {
     document.getElementById('calendarContainer').innerHTML = `<div class="error">❌ ${message}</div>`;
 }
+
+// Timezone change handler
+document.getElementById('tzSelect').addEventListener('change', (e) => {
+    selectedTimezone = e.target.value;
+    console.log('Timezone changed to:', selectedTimezone);
+    loadReservations();
+});
 
 // Navigation
 document.getElementById('btnPrev').addEventListener('click', () => {
@@ -682,7 +761,8 @@ document.getElementById('eventModal').addEventListener('click', (e) => {
     }
 });
 
-// Initial load
+// Set Cairo as default in dropdown and load
+document.getElementById('tzSelect').value = 'Africa/Cairo';
 loadReservations();
 </script>
 </body>
