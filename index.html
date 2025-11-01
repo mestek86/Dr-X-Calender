@@ -2,16 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reservations Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dr X Clinic - Appointments Calendar</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      padding: 20px;
+      padding: 10px;
     }
     
     .container {
@@ -20,118 +24,182 @@
       background: white;
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      padding: 30px;
+      padding: 20px;
+      animation: fadeIn 0.5s ease-in;
     }
     
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Header Section */
     .header {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .header-icon {
+      font-size: 32px;
     }
     
     .title {
-      font-size: 28px;
+      font-size: clamp(18px, 5vw, 28px);
       font-weight: 700;
       color: #333;
+      line-height: 1.2;
     }
     
+    /* Stats Section */
     .stats {
-      display: flex;
-      gap: 15px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
       margin-bottom: 20px;
     }
     
     .stat-card {
-      flex: 1;
       padding: 15px;
       background: linear-gradient(135deg, #667eea15, #764ba215);
       border-radius: 12px;
+      border: 2px solid #667eea30;
+      text-align: center;
     }
     
     .stat-label {
-      font-size: 12px;
+      font-size: 11px;
       color: #666;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
     }
     
     .stat-value {
-      font-size: 24px;
+      font-size: clamp(20px, 5vw, 28px);
       font-weight: 700;
       color: #667eea;
-      margin-top: 5px;
     }
     
+    /* Controls Section */
     .controls {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 20px;
       flex-wrap: wrap;
+      justify-content: center;
     }
     
     button, select {
-      padding: 10px 20px;
+      padding: 12px 16px;
       border: none;
       border-radius: 8px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
+      font-family: inherit;
+      flex: 1;
+      min-width: 90px;
+      max-width: 150px;
     }
     
     button {
       background: #667eea;
       color: white;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     }
     
-    button:hover { background: #5568d3; }
+    button:hover:not(:disabled) {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     
     select {
       background: white;
       border: 2px solid #e0e0e0;
       color: #333;
+      cursor: pointer;
     }
     
+    select:hover {
+      border-color: #667eea;
+    }
+    
+    /* Calendar Grid */
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
+      gap: 8px;
+      margin-top: 20px;
     }
     
     .day-header {
       text-align: center;
       font-weight: 700;
       color: #667eea;
-      padding: 15px 5px;
-      font-size: 12px;
+      padding: 10px 5px;
+      font-size: clamp(10px, 2.5vw, 12px);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .day {
-      min-height: 100px;
+      min-height: 80px;
       border: 2px solid #f0f0f0;
-      border-radius: 12px;
-      padding: 10px;
+      border-radius: 10px;
+      padding: 8px;
       background: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
     }
     
-    .day.empty { background: #fafafa; }
+    .day:hover:not(.empty) {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .day.empty { 
+      background: #fafafa; 
+      cursor: default;
+      pointer-events: none;
+      opacity: 0.5;
+    }
     
     .day.today {
       background: linear-gradient(135deg, #667eea15, #764ba215);
       border-color: #667eea;
+      border-width: 3px;
     }
     
     .day.has-reservation {
       background: linear-gradient(135deg, #fff5f5, #ffe5e5);
       border-color: #ff6b6b;
+      border-width: 3px;
     }
     
     .day-number {
-      font-size: 18px;
+      font-size: clamp(14px, 3vw, 18px);
       font-weight: 700;
       color: #333;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     
     .reservation {
@@ -139,40 +207,65 @@
       color: white;
       padding: 6px 8px;
       border-radius: 6px;
-      margin-top: 5px;
-      font-size: 11px;
+      margin-top: 4px;
+      font-size: clamp(9px, 2vw, 11px);
       cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(238, 90, 111, 0.3);
     }
     
     .reservation:hover {
       transform: scale(1.05);
+      box-shadow: 0 3px 10px rgba(238, 90, 111, 0.5);
     }
     
-    .res-time { font-weight: 700; }
+    .res-time { 
+      font-weight: 700; 
+      margin-bottom: 2px;
+      font-size: clamp(9px, 2vw, 11px);
+    }
+    
     .res-title {
-      font-size: 10px;
-      opacity: 0.9;
-      white-space: nowrap;
+      font-size: clamp(8px, 1.8vw, 10px);
+      opacity: 0.95;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
     
+    /* Loading & Error States */
     .loading {
       text-align: center;
-      padding: 40px;
+      padding: 40px 20px;
       color: #667eea;
-      font-size: 18px;
+      font-size: clamp(14px, 4vw, 18px);
+      font-weight: 600;
+    }
+    
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
     }
     
     .error {
       text-align: center;
-      padding: 40px;
+      padding: 30px 20px;
       color: #ff6b6b;
+      font-size: clamp(12px, 3.5vw, 16px);
       background: #fff5f5;
       border-radius: 12px;
+      border: 2px solid #ff6b6b;
       margin: 20px 0;
+      line-height: 1.6;
     }
     
+    /* Modal Styles */
     .modal {
       display: none;
       position: fixed;
@@ -180,49 +273,199 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      padding: 20px;
+      animation: fadeIn 0.3s ease;
     }
     
-    .modal.active { display: flex; }
+    .modal.active { 
+      display: flex; 
+    }
     
     .modal-content {
       background: white;
       border-radius: 16px;
-      padding: 30px;
+      padding: 25px;
       max-width: 500px;
-      width: 90%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
     
     .modal-header {
-      font-size: 24px;
+      font-size: clamp(18px, 5vw, 24px);
       font-weight: 700;
+      color: #333;
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      word-break: break-word;
     }
     
     .modal-body {
       color: #666;
       line-height: 1.8;
+      font-size: clamp(13px, 3.5vw, 15px);
     }
     
-    .modal-body p { margin-bottom: 12px; }
+    .modal-body p {
+      margin-bottom: 12px;
+      word-break: break-word;
+    }
+    
+    .modal-body strong {
+      color: #333;
+      font-weight: 600;
+    }
     
     .modal-close {
       margin-top: 20px;
       width: 100%;
+      max-width: 100%;
+      padding: 14px;
+      font-size: 16px;
+    }
+    
+    /* Tablet Styles (768px - 1024px) */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .container {
+        padding: 25px;
+      }
+      
+      .calendar-grid {
+        gap: 10px;
+      }
+      
+      .day {
+        min-height: 90px;
+        padding: 10px;
+      }
+      
+      .controls {
+        gap: 10px;
+      }
+      
+      button, select {
+        min-width: 110px;
+      }
+    }
+    
+    /* Desktop Styles (1025px+) */
+    @media (min-width: 1025px) {
+      body {
+        padding: 20px;
+      }
+      
+      .container {
+        padding: 30px;
+      }
+      
+      .calendar-grid {
+        gap: 12px;
+      }
+      
+      .day {
+        min-height: 110px;
+        padding: 12px;
+      }
+    }
+    
+    /* Mobile Landscape */
+    @media (max-width: 767px) and (orientation: landscape) {
+      .day {
+        min-height: 70px;
+      }
+      
+      .reservation {
+        padding: 4px 6px;
+        margin-top: 2px;
+      }
+    }
+    
+    /* Small Mobile (< 375px) */
+    @media (max-width: 374px) {
+      body {
+        padding: 5px;
+      }
+      
+      .container {
+        padding: 12px;
+        border-radius: 12px;
+      }
+      
+      .calendar-grid {
+        gap: 4px;
+      }
+      
+      .day {
+        min-height: 65px;
+        padding: 5px;
+        border-radius: 6px;
+      }
+      
+      .day-number {
+        margin-bottom: 3px;
+      }
+      
+      .reservation {
+        padding: 3px 5px;
+        border-radius: 4px;
+        margin-top: 2px;
+      }
+      
+      .controls {
+        gap: 5px;
+      }
+      
+      button, select {
+        padding: 10px 12px;
+        font-size: 12px;
+        min-width: 70px;
+      }
+    }
+    
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      
+      .container {
+        box-shadow: none;
+        border-radius: 0;
+      }
+      
+      .controls {
+        display: none;
+      }
+      
+      .modal {
+        display: none !important;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Header -->
     <div class="header">
-      <span style="font-size: 32px;">🏥</span>
-      <div class="title" id="monthTitle">Reservations Calendar</div>
+      <span class="header-icon">🏥</span>
+      <div class="title" id="monthTitle">Dr X Clinic</div>
     </div>
     
+    <!-- Statistics -->
     <div class="stats">
       <div class="stat-card">
         <div class="stat-label">Total Events</div>
@@ -234,21 +477,27 @@
       </div>
     </div>
     
+    <!-- Controls -->
     <div class="controls">
-      <button id="btnPrev">← Previous</button>
-      <button id="btnToday">Today</button>
-      <button id="btnNext">Next →</button>
-      <select id="tzSelect">
+      <button id="btnPrev" aria-label="Previous month">← Prev</button>
+      <button id="btnToday" aria-label="Go to today">Today</button>
+      <button id="btnNext" aria-label="Next month">Next →</button>
+      <select id="tzSelect" aria-label="Select timezone">
         <option value="UTC">🌍 UTC</option>
+        <option value="Africa/Cairo">🇪🇬 Cairo</option>
+        <option value="Europe/London">🇬🇧 London</option>
+        <option value="America/New_York">🇺🇸 New York</option>
       </select>
     </div>
     
+    <!-- Calendar Container -->
     <div id="calendarContainer">
-      <div class="loading">Loading calendar data...</div>
+      <div class="loading">Loading calendar data</div>
     </div>
   </div>
   
-  <div id="eventModal" class="modal">
+  <!-- Event Details Modal -->
+  <div id="eventModal" class="modal" role="dialog" aria-modal="true">
     <div class="modal-content">
       <div class="modal-header" id="modalTitle"></div>
       <div class="modal-body" id="modalBody"></div>
@@ -257,18 +506,20 @@
   </div>
 
   <script>
-    // Configuration
-    const API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook/availability';
+    // ⚙️ CONFIGURATION
+    const API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook-test/availability';
     
-    // State
-    let currentDate = new Date(2025, 9, 1); // October 2025 (month is 0-indexed)
+    // State management
+    let currentDate = new Date(2025, 9, 1); // October 2025
     let reservations = [];
+    let timezone = 'UTC';
     
+    // Constants
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
     const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     
-    // Load reservations
+    // Load reservations from API
     async function loadReservations() {
       try {
         const year = currentDate.getFullYear();
@@ -277,9 +528,13 @@
         const fromDate = new Date(year, month, 1).toISOString();
         const toDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
         
-        const url = `${API_URL}?from=${fromDate}&to=${toDate}&tz=UTC`;
+        const url = `${API_URL}?from=${fromDate}&to=${toDate}&tz=${timezone}`;
         
-        console.log('Fetching:', url);
+        console.log('📡 Fetching:', url);
+        
+        // Show loading state
+        document.getElementById('calendarContainer').innerHTML = 
+          '<div class="loading">Loading calendar data</div>';
         
         const response = await fetch(url);
         
@@ -288,7 +543,7 @@
         }
         
         const data = await response.json();
-        console.log('Response:', data);
+        console.log('✅ Response:', data);
         
         if (data.success && data.events) {
           reservations = data.events;
@@ -298,18 +553,19 @@
           showError('No events found or invalid response');
         }
       } catch (error) {
-        console.error('Error:', error);
-        showError(`Error: ${error.message}`);
+        console.error('❌ Error:', error);
+        showError(`Failed to load appointments: ${error.message}`);
       }
     }
     
-    // Update stats
+    // Update statistics
     function updateStats() {
-      document.getElementById('totalEvents').textContent = reservations.length;
-      document.getElementById('monthEvents').textContent = reservations.length;
+      const totalCount = reservations.length;
+      document.getElementById('totalEvents').textContent = totalCount;
+      document.getElementById('monthEvents').textContent = totalCount;
     }
     
-    // Render calendar
+    // Render calendar grid
     function renderCalendar() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -318,23 +574,30 @@
       const daysInMonth = lastDay.getDate();
       const startingDayOfWeek = firstDay.getDay();
       
+      // Update title
       document.getElementById('monthTitle').textContent = 
         `${monthNames[month]} ${year}`;
       
+      // Build calendar HTML
       let html = '<div class="calendar-grid">';
       
-      // Headers
+      // Add weekday headers
       weekdays.forEach(day => {
         html += `<div class="day-header">${day}</div>`;
       });
       
-      // Empty cells
+      // Add empty cells before first day
       for (let i = 0; i < startingDayOfWeek; i++) {
         html += '<div class="day empty"></div>';
       }
       
-      // Days
+      // Get today's date for highlighting
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Add days of the month
       for (let day = 1; day <= daysInMonth; day++) {
+        const currentDateObj = new Date(year, month, day);
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         
         // Find events for this day
@@ -344,22 +607,28 @@
           return resDateStr === dateStr;
         });
         
+        // Determine day classes
+        const isToday = currentDateObj.getTime() === today.getTime();
+        const hasReservations = dayEvents.length > 0;
+        
         let dayClass = 'day';
-        if (dayEvents.length > 0) dayClass += ' has-reservation';
+        if (isToday) dayClass += ' today';
+        if (hasReservations) dayClass += ' has-reservation';
         
         html += `<div class="${dayClass}">`;
         html += `<div class="day-number">${day}</div>`;
         
-        // Add events
+        // Add reservation badges
         dayEvents.forEach(evt => {
           const startTime = new Date(evt.start);
           const hours = String(startTime.getHours()).padStart(2, '0');
           const minutes = String(startTime.getMinutes()).padStart(2, '0');
           const timeStr = `${hours}:${minutes}`;
+          const title = evt.title || evt.name || 'Appointment';
           
           html += `<div class="reservation" onclick="showEvent(${evt.id})">`;
           html += `<div class="res-time">${timeStr}</div>`;
-          html += `<div class="res-title">${evt.title || evt.name}</div>`;
+          html += `<div class="res-title">${title}</div>`;
           html += `</div>`;
         });
         
@@ -370,7 +639,7 @@
       document.getElementById('calendarContainer').innerHTML = html;
     }
     
-    // Show event details
+    // Show event details in modal
     function showEvent(eventId) {
       const event = reservations.find(e => e.id === eventId);
       if (!event) return;
@@ -378,55 +647,123 @@
       const startTime = new Date(event.start);
       const endTime = new Date(event.end);
       
-      document.getElementById('modalTitle').textContent = event.title || event.name;
+      // Calculate duration
+      const durationMs = endTime - startTime;
+      const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+      const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+      const durationStr = durationHours > 0 
+        ? `${durationHours}h ${durationMinutes}m` 
+        : `${durationMinutes}m`;
+      
+      document.getElementById('modalTitle').innerHTML = 
+        `📌 ${event.title || event.name}`;
+      
       document.getElementById('modalBody').innerHTML = `
         <p><strong>📅 Start:</strong> ${startTime.toLocaleString()}</p>
         <p><strong>🏁 End:</strong> ${endTime.toLocaleString()}</p>
+        <p><strong>⏱️ Duration:</strong> ${durationStr}</p>
         ${event.reference ? `<p><strong>🔖 Reference:</strong> ${event.reference}</p>` : ''}
         ${event.phone ? `<p><strong>📞 Phone:</strong> ${event.phone}</p>` : ''}
         ${event.payment ? `<p><strong>💳 Payment:</strong> ${event.payment}</p>` : ''}
-        ${event.description ? `<p><strong>📝 Description:</strong><br>${event.description}</p>` : ''}
+        ${event.description ? `<p><strong>📝 Description:</strong><br>${event.description.replace(/\\n/g, '<br>')}</p>` : ''}
       `;
       
       document.getElementById('eventModal').classList.add('active');
+      
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
     }
     
-    // Make showEvent global
+    // Make showEvent available globally
     window.showEvent = showEvent;
     
-    // Show error
+    // Show error message
     function showError(message) {
       document.getElementById('calendarContainer').innerHTML = 
         `<div class="error">❌ ${message}</div>`;
     }
     
-    // Navigation
+    // Navigation: Previous month
     document.getElementById('btnPrev').addEventListener('click', () => {
       currentDate.setMonth(currentDate.getMonth() - 1);
       loadReservations();
     });
     
+    // Navigation: Next month
     document.getElementById('btnNext').addEventListener('click', () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
       loadReservations();
     });
     
+    // Navigation: Today
     document.getElementById('btnToday').addEventListener('click', () => {
       currentDate = new Date(2025, 9, 1);
       loadReservations();
     });
     
-    document.getElementById('modalClose').addEventListener('click', () => {
-      document.getElementById('eventModal').classList.remove('active');
+    // Timezone change
+    document.getElementById('tzSelect').addEventListener('change', (e) => {
+      timezone = e.target.value;
+      loadReservations();
     });
     
+    // Modal close button
+    document.getElementById('modalClose').addEventListener('click', () => {
+      document.getElementById('eventModal').classList.remove('active');
+      document.body.style.overflow = '';
+    });
+    
+    // Modal background click to close
     document.getElementById('eventModal').addEventListener('click', (e) => {
       if (e.target.id === 'eventModal') {
         document.getElementById('eventModal').classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+    
+    // Touch gesture support for mobile navigation
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches,[object Object],screenX;
+    });
+    
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches,[object Object],screenX;
+      handleSwipe();
+    });
+    
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      if (touchEndX < touchStartX - swipeThreshold) {
+        // Swipe left - next month
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        loadReservations();
+      }
+      if (touchEndX > touchStartX + swipeThreshold) {
+        // Swipe right - previous month
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        loadReservations();
+      }
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        loadReservations();
+      } else if (e.key === 'ArrowRight') {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        loadReservations();
+      } else if (e.key === 'Escape') {
+        document.getElementById('eventModal').classList.remove('active');
+        document.body.style.overflow = '';
       }
     });
     
     // Initial load
+    console.log('🚀 Calendar initialized');
     loadReservations();
   </script>
 </body>
