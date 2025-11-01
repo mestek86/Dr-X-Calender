@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Reservations Calendar</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -184,6 +184,7 @@
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      padding: 20px;
     }
     
     .modal.active { display: flex; }
@@ -193,8 +194,10 @@
       border-radius: 16px;
       padding: 30px;
       max-width: 500px;
-      width: 90%;
+      width: 100%;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-height: 90vh;
+      overflow-y: auto;
     }
     
     .modal-header {
@@ -213,6 +216,249 @@
     .modal-close {
       margin-top: 20px;
       width: 100%;
+    }
+    
+    /* ===== RESPONSIVE STYLES ===== */
+    
+    /* Tablets (Portrait) */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 20px;
+        border-radius: 15px;
+      }
+      
+      .title {
+        font-size: 22px;
+      }
+      
+      .stats {
+        flex-direction: row;
+        gap: 10px;
+      }
+      
+      .stat-card {
+        padding: 12px;
+      }
+      
+      .stat-value {
+        font-size: 20px;
+      }
+      
+      .controls {
+        gap: 8px;
+      }
+      
+      button, select {
+        flex: 1;
+        min-width: 80px;
+        padding: 12px 10px;
+        font-size: 13px;
+      }
+      
+      .calendar-grid {
+        gap: 8px;
+      }
+      
+      .day {
+        min-height: 80px;
+        padding: 8px;
+      }
+      
+      .day-header {
+        padding: 10px 3px;
+        font-size: 11px;
+      }
+      
+      .day-number {
+        font-size: 16px;
+      }
+      
+      .reservation {
+        padding: 5px 6px;
+        font-size: 10px;
+        margin-top: 4px;
+      }
+      
+      .res-title {
+        font-size: 9px;
+      }
+      
+      .modal-content {
+        padding: 25px;
+      }
+      
+      .modal-header {
+        font-size: 20px;
+      }
+    }
+    
+    /* Mobile Phones */
+    @media (max-width: 480px) {
+      body {
+        padding: 5px;
+      }
+      
+      .container {
+        padding: 15px;
+        border-radius: 12px;
+      }
+      
+      .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+      
+      .title {
+        font-size: 18px;
+      }
+      
+      .stats {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .stat-card {
+        padding: 10px;
+        text-align: center;
+      }
+      
+      .stat-label {
+        font-size: 10px;
+      }
+      
+      .stat-value {
+        font-size: 18px;
+      }
+      
+      .controls {
+        gap: 6px;
+      }
+      
+      button, select {
+        padding: 10px 8px;
+        font-size: 12px;
+        min-width: 70px;
+      }
+      
+      .calendar-grid {
+        gap: 5px;
+      }
+      
+      .day {
+        min-height: 65px;
+        padding: 5px;
+        border-radius: 8px;
+      }
+      
+      .day-header {
+        padding: 8px 2px;
+        font-size: 9px;
+      }
+      
+      .day-number {
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+      
+      .reservation {
+        padding: 4px 5px;
+        font-size: 9px;
+        margin-top: 3px;
+        border-radius: 4px;
+      }
+      
+      .res-time {
+        font-size: 9px;
+      }
+      
+      .res-title {
+        font-size: 8px;
+      }
+      
+      .loading, .error {
+        padding: 30px 15px;
+        font-size: 14px;
+      }
+      
+      .modal {
+        padding: 10px;
+      }
+      
+      .modal-content {
+        padding: 20px;
+        border-radius: 12px;
+      }
+      
+      .modal-header {
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+      
+      .modal-body {
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      
+      .modal-close {
+        padding: 12px;
+        font-size: 14px;
+      }
+    }
+    
+    /* Very Small Phones */
+    @media (max-width: 360px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .title {
+        font-size: 16px;
+      }
+      
+      button, select {
+        font-size: 11px;
+        padding: 8px 6px;
+        min-width: 60px;
+      }
+      
+      .calendar-grid {
+        gap: 3px;
+      }
+      
+      .day {
+        min-height: 55px;
+        padding: 4px;
+      }
+      
+      .day-header {
+        font-size: 8px;
+        padding: 6px 1px;
+      }
+      
+      .day-number {
+        font-size: 12px;
+      }
+      
+      .reservation {
+        padding: 3px 4px;
+        font-size: 8px;
+      }
+    }
+    
+    /* Landscape Mode on Mobile */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .day {
+        min-height: 60px;
+      }
+      
+      .stats {
+        flex-direction: row;
+      }
     }
   </style>
 </head>
@@ -235,7 +481,7 @@
     </div>
     
     <div class="controls">
-      <button id="btnPrev">← Previous</button>
+      <button id="btnPrev">← Prev</button>
       <button id="btnToday">Today</button>
       <button id="btnNext">Next →</button>
       <select id="tzSelect">
@@ -258,7 +504,7 @@
 
   <script>
     // Configuration
-    const API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook/availability';
+    const API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook-test/availability';
     
     // State
     let currentDate = new Date(2025, 9, 1); // October 2025 (month is 0-indexed)
