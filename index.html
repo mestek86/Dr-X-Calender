@@ -51,30 +51,64 @@ body {
 
 .stats {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     margin-bottom: 15px;
 }
 
 .stat-card {
-    padding: 12px;
-    background: #f5f5ff;
+    padding: 10px;
+    background: linear-gradient(135deg, #f5f5ff, #e8e8ff);
     border-radius: 10px;
     text-align: center;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.stat-card.visits {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #e8edff, #d4dcff);
+}
+
+.stat-card.cash {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+}
+
+.stat-card.credit {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
 }
 
 .stat-label {
-    font-size: 10px;
+    font-size: 9px;
     color: #666;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .stat-value {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
+    margin-top: 4px;
+}
+
+.stat-card.visits .stat-value {
     color: #667eea;
-    margin-top: 5px;
+}
+
+.stat-card.cash .stat-value {
+    color: #10b981;
+}
+
+.stat-card.credit .stat-value {
+    color: #f59e0b;
+}
+
+.stat-icon {
+    font-size: 16px;
+    margin-bottom: 2px;
 }
 
 .controls {
@@ -287,16 +321,24 @@ select {
     }
     
     .stats {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 15px;
     }
     
+    .stat-card {
+        padding: 15px;
+    }
+    
     .stat-label {
-        font-size: 12px;
+        font-size: 11px;
     }
     
     .stat-value {
-        font-size: 24px;
+        font-size: 26px;
+    }
+    
+    .stat-icon {
+        font-size: 20px;
     }
     
     .controls {
@@ -413,6 +455,26 @@ select {
         font-size: 14px;
     }
     
+    .stats {
+        gap: 5px;
+    }
+    
+    .stat-card {
+        padding: 8px 4px;
+    }
+    
+    .stat-label {
+        font-size: 8px;
+    }
+    
+    .stat-value {
+        font-size: 16px;
+    }
+    
+    .stat-icon {
+        font-size: 14px;
+    }
+    
     .calendar-grid {
         gap: 2px;
     }
@@ -465,13 +527,20 @@ select {
     </div>
     
     <div class="stats">
-        <div class="stat-card">
-            <div class="stat-label">Total Events</div>
-            <div class="stat-value" id="totalEvents">0</div>
+        <div class="stat-card visits">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Visits</div>
+            <div class="stat-value" id="totalVisits">0</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">This Month</div>
-            <div class="stat-value" id="monthEvents">0</div>
+        <div class="stat-card cash">
+            <div class="stat-icon">💵</div>
+            <div class="stat-label">Cash</div>
+            <div class="stat-value" id="totalCash">0</div>
+        </div>
+        <div class="stat-card credit">
+            <div class="stat-icon">💳</div>
+            <div class="stat-label">Credit Card</div>
+            <div class="stat-value" id="totalCredit">0</div>
         </div>
     </div>
     
@@ -554,8 +623,25 @@ function loadReservations() {
 }
 
 function updateStats() {
-    document.getElementById('totalEvents').textContent = reservations.length;
-    document.getElementById('monthEvents').textContent = reservations.length;
+    var totalVisits = reservations.length;
+    var cashCount = 0;
+    var creditCount = 0;
+    
+    for (var i = 0; i < reservations.length; i++) {
+        var payment = reservations[i].payment;
+        if (payment) {
+            var paymentLower = payment.toLowerCase();
+            if (paymentLower.indexOf('cash') !== -1 || paymentLower === 'cash') {
+                cashCount++;
+            } else if (paymentLower.indexOf('credit') !== -1 || paymentLower.indexOf('card') !== -1 || paymentLower === 'credit card') {
+                creditCount++;
+            }
+        }
+    }
+    
+    document.getElementById('totalVisits').textContent = totalVisits;
+    document.getElementById('totalCash').textContent = cashCount;
+    document.getElementById('totalCredit').textContent = creditCount;
 }
 
 function renderCalendar() {
