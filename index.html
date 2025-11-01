@@ -299,172 +299,49 @@ select {
 }
 
 @media (max-width: 400px) {
-    body {
-        padding: 8px;
-    }
-    
-    .container {
-        padding: 12px;
-        border-radius: 15px;
-    }
-    
-    .header {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .header-icon {
-        font-size: 28px;
-    }
-    
-    .stats {
-        gap: 10px;
-    }
-    
-    .controls {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    select {
-        grid-column: 1 / -1;
-    }
-    
-    .calendar-grid {
-        gap: 2px;
-    }
-    
-    .day {
-        min-height: 50px;
-        padding: 3px;
-        border-width: 1px;
-    }
-    
-    .day-header {
-        padding: 6px 2px;
-        font-size: 8px;
-    }
-    
-    .day-number {
-        font-size: 11px;
-        margin-bottom: 2px;
-    }
-    
-    .reservation {
-        padding: 2px 3px;
-        font-size: 7px;
-        margin-top: 2px;
-        border-radius: 3px;
-    }
-    
-    .reservation:hover {
-        transform: scale(1);
-    }
-    
-    .res-time {
-        font-size: 7px;
-    }
-    
-    .res-title {
-        font-size: 6px;
-        -webkit-line-clamp: 1;
-    }
+    body { padding: 8px; }
+    .container { padding: 12px; border-radius: 15px; }
+    .header { flex-direction: column; gap: 8px; }
+    .header-icon { font-size: 28px; }
+    .stats { gap: 10px; }
+    .controls { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    select { grid-column: 1 / -1; }
+    .calendar-grid { gap: 2px; }
+    .day { min-height: 50px; padding: 3px; border-width: 1px; }
+    .day-header { padding: 6px 2px; font-size: 8px; }
+    .day-number { font-size: 11px; margin-bottom: 2px; }
+    .reservation { padding: 2px 3px; font-size: 7px; margin-top: 2px; border-radius: 3px; }
+    .reservation:hover { transform: scale(1); }
+    .res-time { font-size: 7px; }
+    .res-title { font-size: 6px; -webkit-line-clamp: 1; }
 }
 
 @media (min-width: 401px) and (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-    
-    .container {
-        padding: 15px;
-    }
-    
-    .controls {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .calendar-grid {
-        gap: 4px;
-    }
-    
-    .day {
-        min-height: 65px;
-        padding: 5px;
-    }
-    
-    .reservation {
-        padding: 3px 5px;
-    }
+    body { padding: 10px; }
+    .container { padding: 15px; }
+    .controls { grid-template-columns: repeat(4, 1fr); }
+    .calendar-grid { gap: 4px; }
+    .day { min-height: 65px; padding: 5px; }
+    .reservation { padding: 3px 5px; }
 }
 
 @media (min-width: 601px) and (max-width: 900px) {
-    .container {
-        padding: 25px;
-    }
-    
-    .controls {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .calendar-grid {
-        gap: 8px;
-    }
-    
-    .day {
-        min-height: 90px;
-    }
+    .container { padding: 25px; }
+    .controls { grid-template-columns: repeat(4, 1fr); }
+    .calendar-grid { gap: 8px; }
+    .day { min-height: 90px; }
 }
 
 @media (max-width: 900px) and (orientation: landscape) {
-    .day {
-        min-height: 55px;
-    }
-    
-    .stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .controls {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .reservation {
-        padding: 2px 4px;
-        font-size: 8px;
-    }
+    .day { min-height: 55px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .controls { grid-template-columns: repeat(4, 1fr); }
+    .reservation { padding: 2px 4px; font-size: 8px; }
 }
 
 @media (min-width: 901px) {
-    .controls {
-        display: flex;
-        justify-content: flex-start;
-    }
-    
-    button, select {
-        flex: 0 1 auto;
-        min-width: 100px;
-    }
-}
-
-@media print {
-    body {
-        background: white;
-        padding: 0;
-    }
-    
-    .container {
-        box-shadow: none;
-        border-radius: 0;
-    }
-    
-    .controls {
-        display: none;
-    }
-    
-    .modal {
-        display: none !important;
-    }
+    .controls { display: flex; justify-content: flex-start; }
+    button, select { flex: 0 1 auto; min-width: 100px; }
 }
 </style>
 </head>
@@ -513,104 +390,96 @@ select {
 </div>
 
 <script>
-// Configuration
-const API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook/availability';
+var API_URL = 'https://n8n.srv1053548.hstgr.cloud/webhook/availability';
+var currentDate = new Date(2025, 9, 1);
+var reservations = [];
+var selectedTimezone = 'Africa/Cairo';
 
-// State
-let currentDate = new Date(2025, 9, 1);
-let reservations = [];
-let selectedTimezone = 'Africa/Cairo';
+var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+var weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'];
-const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-
-// Format time for display in selected timezone
-function formatTimeInTimezone(date, timezone) {
-    try {
-        const options = { 
-            timeZone: timezone,
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        };
-        return date.toLocaleString('en-US', options);
-    } catch (error) {
-        console.error('Time formatting error:', error);
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return hours + ':' + minutes;
-    }
+function pad(num) {
+    return String(num).padStart(2, '0');
 }
 
-// Format date for display in selected timezone
-function formatDateInTimezone(date, timezone) {
-    try {
-        const converted = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
-        return {
-            year: converted.getFullYear(),
-            month: converted.getMonth(),
-            day: converted.getDate()
-        };
-    } catch (error) {
-        console.error('Date formatting error:', error);
-        return {
-            year: date.getFullYear(),
-            month: date.getMonth(),
-            day: date.getDate()
-        };
-    }
+function formatTime(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    return pad(hours) + ':' + pad(minutes);
 }
 
-// Load reservations
-async function loadReservations() {
-    try {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const fromDate = new Date(year, month, 1).toISOString();
-        const toDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
-        const url = API_URL + '?from=' + fromDate + '&to=' + toDate + '&tz=' + selectedTimezone;
-        
-        console.log('Fetching:', url);
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-        }
-        
-        const data = await response.json();
-        console.log('Response:', data);
-        
-        if (data.success && data.events) {
-            reservations = data.events;
-            updateStats();
-            renderCalendar();
-        } else {
-            showError('No events found or invalid response');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showError('Error: ' + error.message);
+function convertToTimezone(dateStr, tz) {
+    var date = new Date(dateStr);
+    var utcTime = date.getTime();
+    var tzOffset = 0;
+    
+    if (tz === 'Africa/Cairo') {
+        tzOffset = 2 * 60;
+    } else if (tz === 'America/New_York') {
+        tzOffset = -5 * 60;
+    } else if (tz === 'Europe/London') {
+        tzOffset = 0;
+    } else if (tz === 'Asia/Dubai') {
+        tzOffset = 4 * 60;
     }
+    
+    var localTime = utcTime + (tzOffset * 60 * 1000);
+    return new Date(localTime);
 }
 
-// Update stats
+function getDateString(date) {
+    var year = date.getFullYear();
+    var month = pad(date.getMonth() + 1);
+    var day = pad(date.getDate());
+    return year + '-' + month + '-' + day;
+}
+
+function loadReservations() {
+    var year = currentDate.getFullYear();
+    var month = currentDate.getMonth();
+    var fromDate = new Date(year, month, 1).toISOString();
+    var toDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
+    var url = API_URL + '?from=' + fromDate + '&to=' + toDate + '&tz=' + selectedTimezone;
+    
+    console.log('Fetching:', url);
+    
+    fetch(url)
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            console.log('Response:', data);
+            if (data.success && data.events) {
+                reservations = data.events;
+                updateStats();
+                renderCalendar();
+            } else {
+                showError('No events found');
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+            showError('Error: ' + error.message);
+        });
+}
+
 function updateStats() {
     document.getElementById('totalEvents').textContent = reservations.length;
     document.getElementById('monthEvents').textContent = reservations.length;
 }
 
-// Render calendar
 function renderCalendar() {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+    var year = currentDate.getFullYear();
+    var month = currentDate.getMonth();
+    var firstDay = new Date(year, month, 1);
+    var lastDay = new Date(year, month + 1, 0);
+    var daysInMonth = lastDay.getDate();
+    var startingDayOfWeek = firstDay.getDay();
     
-    // Get timezone name for display
-    let tzName = 'UTC';
+    var tzName = 'UTC';
     if (selectedTimezone === 'Africa/Cairo') {
         tzName = 'Cairo Time';
     } else if (selectedTimezone !== 'UTC') {
@@ -619,35 +488,30 @@ function renderCalendar() {
     
     document.getElementById('monthTitle').textContent = monthNames[month] + ' ' + year + ' (' + tzName + ')';
     
-    let html = '<div class="calendar-grid">';
+    var html = '<div class="calendar-grid">';
     
-    // Headers
-    weekdays.forEach(function(day) {
-        html += '<div class="day-header">' + day + '</div>';
-    });
+    for (var i = 0; i < weekdays.length; i++) {
+        html += '<div class="day-header">' + weekdays[i] + '</div>';
+    }
     
-    // Empty cells
-    for (let i = 0; i < startingDayOfWeek; i++) {
+    for (var i = 0; i < startingDayOfWeek; i++) {
         html += '<div class="day empty"></div>';
     }
     
-    // Days
-    for (let day = 1; day <= daysInMonth; day++) {
-        const monthStr = String(month + 1).padStart(2, '0');
-        const dayStr = String(day).padStart(2, '0');
-        const dateStr = year + '-' + monthStr + '-' + dayStr;
+    for (var day = 1; day <= daysInMonth; day++) {
+        var dateStr = year + '-' + pad(month + 1) + '-' + pad(day);
         
-        // Find events for this day in selected timezone
-        const dayEvents = reservations.filter(function(res) {
-            const resDate = new Date(res.start);
-            const converted = formatDateInTimezone(resDate, selectedTimezone);
-            const convertedMonthStr = String(converted.month + 1).padStart(2, '0');
-            const convertedDayStr = String(converted.day).padStart(2, '0');
-            const resDateStr = converted.year + '-' + convertedMonthStr + '-' + convertedDayStr;
-            return resDateStr === dateStr;
-        });
+        var dayEvents = [];
+        for (var j = 0; j < reservations.length; j++) {
+            var res = reservations[j];
+            var resDate = convertToTimezone(res.start, selectedTimezone);
+            var resDateStr = getDateString(resDate);
+            if (resDateStr === dateStr) {
+                dayEvents.push(res);
+            }
+        }
         
-        let dayClass = 'day';
+        var dayClass = 'day';
         if (dayEvents.length > 0) {
             dayClass += ' has-reservation';
         }
@@ -655,17 +519,17 @@ function renderCalendar() {
         html += '<div class="' + dayClass + '">';
         html += '<div class="day-number">' + day + '</div>';
         
-        // Add events
-        dayEvents.forEach(function(evt) {
-            const startTime = new Date(evt.start);
-            const timeStr = formatTimeInTimezone(startTime, selectedTimezone);
-            const title = evt.title || evt.name;
+        for (var k = 0; k < dayEvents.length; k++) {
+            var evt = dayEvents[k];
+            var startTime = convertToTimezone(evt.start, selectedTimezone);
+            var timeStr = formatTime(startTime);
+            var title = evt.title || evt.name || 'Event';
             
             html += '<div class="reservation" onclick="showEvent(' + evt.id + ')">';
             html += '<div class="res-time">' + timeStr + '</div>';
             html += '<div class="res-title">' + title + '</div>';
             html += '</div>';
-        });
+        }
         
         html += '</div>';
     }
@@ -674,41 +538,31 @@ function renderCalendar() {
     document.getElementById('calendarContainer').innerHTML = html;
 }
 
-// Show event details
 function showEvent(eventId) {
-    const event = reservations.find(function(e) {
-        return e.id === eventId;
-    });
+    var event = null;
+    for (var i = 0; i < reservations.length; i++) {
+        if (reservations[i].id === eventId) {
+            event = reservations[i];
+            break;
+        }
+    }
     
     if (!event) return;
     
-    const startTime = new Date(event.start);
-    const endTime = new Date(event.end);
+    var startTime = convertToTimezone(event.start, selectedTimezone);
+    var endTime = convertToTimezone(event.end, selectedTimezone);
     
-    // Format dates in selected timezone
-    const startStr = startTime.toLocaleString('en-US', { 
-        timeZone: selectedTimezone,
-        dateStyle: 'full',
-        timeStyle: 'short'
-    });
-    
-    const endStr = endTime.toLocaleString('en-US', { 
-        timeZone: selectedTimezone,
-        dateStyle: 'full',
-        timeStyle: 'short'
-    });
-    
-    let tzName = 'UTC';
+    var tzName = 'UTC';
     if (selectedTimezone === 'Africa/Cairo') {
         tzName = 'Cairo Time';
     } else if (selectedTimezone !== 'UTC') {
         tzName = selectedTimezone.split('/'),[object Object],;
     }
     
-    const title = event.title || event.name;
+    var title = event.title || event.name || 'Event';
     
-    let bodyHtml = '<p><strong>📅 Start:</strong> ' + startStr + '</p>';
-    bodyHtml += '<p><strong>🏁 End:</strong> ' + endStr + '</p>';
+    var bodyHtml = '<p><strong>📅 Start:</strong> ' + startTime.toLocaleString() + '</p>';
+    bodyHtml += '<p><strong>🏁 End:</strong> ' + endTime.toLocaleString() + '</p>';
     bodyHtml += '<p><strong>🌍 Timezone:</strong> ' + tzName + '</p>';
     
     if (event.reference) {
@@ -730,22 +584,18 @@ function showEvent(eventId) {
     document.body.style.overflow = 'hidden';
 }
 
-// Make showEvent global
 window.showEvent = showEvent;
 
-// Show error
 function showError(message) {
     document.getElementById('calendarContainer').innerHTML = '<div class="error">❌ ' + message + '</div>';
 }
 
-// Timezone change handler
 document.getElementById('tzSelect').addEventListener('change', function(e) {
     selectedTimezone = e.target.value;
     console.log('Timezone changed to:', selectedTimezone);
     loadReservations();
 });
 
-// Navigation
 document.getElementById('btnPrev').addEventListener('click', function() {
     currentDate.setMonth(currentDate.getMonth() - 1);
     loadReservations();
@@ -773,7 +623,6 @@ document.getElementById('eventModal').addEventListener('click', function(e) {
     }
 });
 
-// Set Cairo as default in dropdown and load
 document.getElementById('tzSelect').value = 'Africa/Cairo';
 loadReservations();
 </script>
